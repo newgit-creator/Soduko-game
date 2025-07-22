@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sudoku Game</title>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js" crossorigin="anonymous"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      margin-top: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 10px auto;
+      width: 90vw;
+      max-width: 400px;
+    }
+    td {
+      border: 1px solid #333;
+      width: 10vw;
+      height: 10vw;
+      max-width: 45px;
+      max-height: 45px;
+    }
+    input {
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      font-size: 5vw;
+      max-font-size: 20px;
+      border: none;
+      background-color: white;
+    }
+    input:focus {
+      outline: none;
+      background-color: #e0f7fa;
+    }
+    .fixed {
+      background-color: #ddd;
+      font-weight: bold;
+    }
+    td.thick-border-left { border-left: 3px solid #000; }
+    td.thick-border-top { border-top: 3px solid #000; }
+    td.thick-border-right { border-right: 3px solid #000; }
+    td.thick-border-bottom { border-bottom: 3px solid #000; }
+
+    button, select {
+      margin: 8px;
+      padding: 10px 14px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #result {
+      font-weight: bold;
+      margin-top: 10px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sudoku Game</h1>
+
+  <!-- AdSense Display Ad -->
+  <ins class="adsbygoogle"
+       style="display:block; text-align:center"
+       data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+       data-ad-slot="1234567890"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>
+       (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+
+  <label for="difficulty">Difficulty:</label>
+  <select id="difficulty">
+    <option value="easy">Easy</option>
+    <option value="medium" selected>Medium</option>
+    <option value="hard">Hard</option>
+  </select>
+
+  <br>
+  <label for="reveal-count">Clues to show:</label>
+  <input type="number" id="reveal-count" min="17" max="81" value="36" />
+  <small>(17 = hardest, 81 = full board)</small>
+
+  <table id="sudoku-board"></table>
+  <button onclick="checkSolution()">✅ Check</button>
+  <button onclick="generatePuzzle()">🔄 New Puzzle</button>
+  <button onclick="createBoard(fullGrid)">🧠 Show Solution</button>
+  <p id="result"></p>
+
+  <script>
+    let fullGrid = [];
+    let puzzleGrid = [];
+
+    function generateEmptyGrid() {
+      return Array.from({ length: 9 }, () => Array(9).fill(0));
+    }
+
+    function isSafe(grid, row, col, num) {
+      for (let i = 0; i < 9; i++) {
+        if (grid[row][i] === num || grid[i][col] === num) return false;
+        const boxRow = 3 * Math.floor(row / 3) + Math.floor(i / 3);
+        const boxCol = 3 * Math.floor(col / 3) + (i % 3);
+        if (grid[boxRow][boxCol] === num) return false;
+      }
+      return true;
+    }
+
+    function fillGrid(grid) {
+      for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+          if (grid[row][col] === 0) {
+            const numbers = [...Array(9).keys()].map(n => n + 1).sort(() => Math.random() - 0.5);
+            for (let num of numbers) {
+              if (isSafe(grid, row, col, num)) {
+                grid[row][col] = num;
+                if (fillGrid(grid)) return true;
+                grid[row][col] = 0;
+              }
+            }
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    function removeNumbers(grid, count) {
+      const puzzle = grid.map(row => [...row]);
+      let removed = 0;
+      while (removed < count) {
+        const row = Math.floor(Math.random() * 9);
+        const col = Math.floor(Math.random() * 9);
+        if (puzzle[row][col] !== 0) {
+          puzzle[row][col] = 0;
+          removed++;
+        }
+      }
+      return puzzle;
+    }
+
+    function generatePuzzle() {
+      fullGrid = generateEmptyGrid();
+      fillGrid(fullGrid);
+      const clues = parseInt(document.getElementById("reveal-count").value || "36");
+      const count = 81 - clues;
+      puzzleGrid = removeNumbers(fullGrid, count);
+      createBoard(puzzleGrid);
+      document.getElementById('result').innerText = '';
+    }
+
+    function createBoard(grid) {
+      const board = document.getElementById('sudoku-board');
+      board.innerHTML = '';
+      for (let row = 0; row < 9; row++) {
+        const tr = document.createElement('tr');
+        for (let col = 0; col < 9; col++) {
+          const td = document.createElement('td');
+          if (col % 3 === 0) td.classList.add('thick-border-left');
+          if (col === 8) td.classList.add('thick-border-right');
+          if (row % 3 === 0) td.classList.add('thick-border-top');
+          if (row === 8) td.classList.add('thick-border-bottom');
+
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.inputMode = 'numeric';
+          input.maxLength = 1;
+          input.pattern = "[1-9]";
+          input.oninput = () => {
+            input.value = input.value.replace(/[^1-9]/g, '');
+          };
+
+          if (grid[row][col] !== 0) {
+            input.value = grid[row][col];
+            input.disabled = true;
+            input.classList.add('fixed');
+          }
+
+          td.appendChild(input);
+          tr.appendChild(td);
+        }
+        board.appendChild(tr);
+      }
+    }
+
+    function checkSolution() {
+      const board = document.getElementById('sudoku-board');
+      let isCorrect = true;
+
+      for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+          const val = parseInt(board.rows[i].cells[j].querySelector('input').value);
+          if (val !== fullGrid[i][j]) {
+            isCorrect = false;
+            break;
+          }
+        }
+      }
+
+      const resultElement = document.getElementById('result');
+      resultElement.innerText = isCorrect ? '✅ Correct!' : '❌ Incorrect.';
+
+      setTimeout(() => {
+        resultElement.innerText = '';
+      }, 3000);
+    }
+
+    generatePuzzle();
+  </script>
+</body>
+</html>
